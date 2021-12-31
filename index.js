@@ -1,17 +1,19 @@
-import { ApolloServer, gql } from "apollo-server-express";
+import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import express from "express";
-import http from "http";
+import { createServer } from "http";
 import mongoose from "mongoose";
+import typeDefs from "./typeDefs/index.js";
+import resolvers from "./resolvers/index.js";
 
 import { DB } from "./config/index.js";
 import pkg from "consola";
 const { success } = pkg;
 
-async function startApolloServer(typeDefs, resolvers) {
+async function startApolloServer() {
   // Required logic for integrating with Express
   const app = express();
-  const httpServer = http.createServer(app);
+  const httpServer = createServer(app);
 
   // Same ApolloServer initialization as before, plus the drain plugin.
   const server = new ApolloServer({
@@ -42,44 +44,10 @@ async function startApolloServer(typeDefs, resolvers) {
     });
 }
 
-const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
-  }
-
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
-  type Query {
-    books: [Book]
-  }
-`;
-
-const resolvers = {
-  Query: {
-    books: () => books,
-  },
-};
-
 mongoose.connect(DB, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 success({ badge: true, message: `🚀 DB Connected Successfully` });
 
-startApolloServer(typeDefs, resolvers);
-
-const books = [
-  {
-    title: "The Awakening",
-    author: "Kate Chopin",
-  },
-  {
-    title: "City of Glass",
-    author: "Paul Auster",
-  },
-];
+startApolloServer();
