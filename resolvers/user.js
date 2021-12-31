@@ -3,7 +3,6 @@ import { compare, hash } from "bcrypt";
 import { issueToken, serializeUser } from "../functions/index.js";
 import { sendEmail } from "../functions/sendEmail.js";
 import { v4 as uuid } from "uuid";
-import Redis from "ioredis";
 import {
   UserRegistrationRules,
   UserAuthenticationRules,
@@ -20,8 +19,6 @@ const myCustomLabels = {
   pagingCounter: "slNo",
   meta: "paginator",
 };
-
-const redis = new Redis();
 
 export default {
   Query: {
@@ -143,7 +140,7 @@ export default {
         throw new ApolloError(error.message, 400);
       }
     },
-    forgotPassword: async (_, { id, email }, { User, redis }) => {
+    forgotPassword: async (_, { id, email }, { User }) => {
       try {
         const usr = await User.findById(id);
         if (usr.email !== email)
@@ -151,12 +148,14 @@ export default {
 
         // generate random 6 digits code
         const token = uuid();
-        await redis.set(
-          "forget-password:" + token,
-          usr.id,
-          "ex",
-          1000 * 3600 * 24 * 3 // 3 days to expire
-        );
+        // write token to the database user record
+
+        // await redis.set(
+        //   "forget-password:" + token,
+        //   usr.id,
+        //   "ex",
+        //   1000 * 3600 * 24 * 3 // 3 days to expire
+        // );
         // save generated code in the database
         // send an email
 
@@ -169,9 +168,11 @@ export default {
         throw new ApolloError(error.message, 400);
       }
     },
-    changePassword: async (_, { token, newPassword }, { User, redis }) => {
+    changePassword: async (_, { token, newPassword }, { User }) => {
       try {
-        const userId = await redis.get("forget-password:" + token);
+        // const userId = await redis.get("forget-password:" + token);
+        // get the user id from the database using the provided token
+        const userId = "618776703dc2e3c7bc8386e1";
         if (!userId) throw new ApolloError("token is incorrect or expired");
 
         let user = await User.findById(userId);

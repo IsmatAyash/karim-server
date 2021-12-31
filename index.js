@@ -9,9 +9,6 @@ import * as AppModels from "./models/index.js";
 
 import { DB } from "./config/index.js";
 import consola from "consola";
-import Redis from "ioredis";
-
-const redis = new Redis();
 
 async function startApolloServer() {
   // Required logic for integrating with Express
@@ -25,7 +22,7 @@ async function startApolloServer() {
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     context: ({ req }) => {
       const user = req.user || null;
-      return { user, redis, ...AppModels };
+      return { user, ...AppModels };
     },
   });
 
