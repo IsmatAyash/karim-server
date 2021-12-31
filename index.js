@@ -5,6 +5,8 @@ import http from "http";
 import mongoose from "mongoose";
 
 import { DB } from "./config/index.js";
+import pkg from "consola";
+const { success } = pkg;
 
 async function startApolloServer(typeDefs, resolvers) {
   // Required logic for integrating with Express
@@ -34,9 +36,10 @@ async function startApolloServer(typeDefs, resolvers) {
     httpServer.listen({ port: process.env.PORT || 4000 }, resolve)
   );
   if (process.env.NODE_ENV !== "production")
-    console.log(
-      `🚀 Server ready at http://localhost:4000${server.graphqlPath}`
-    );
+    success({
+      badge: true,
+      message: `🚀 Server started on http://localhost:4000${server.graphqlPath}`,
+    });
 }
 
 const typeDefs = gql`
@@ -66,7 +69,7 @@ mongoose.connect(DB, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-console.log(`🚀 DB Connected Successfully`);
+success({ badge: true, message: `🚀 DB Connected Successfully` });
 
 startApolloServer(typeDefs, resolvers);
 
