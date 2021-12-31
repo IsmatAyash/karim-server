@@ -5,10 +5,13 @@ import { createServer } from "http";
 import mongoose from "mongoose";
 import typeDefs from "./typeDefs/index.js";
 import resolvers from "./resolvers/index.js";
+import * as AppModels from "./models/index.js";
 
 import { DB } from "./config/index.js";
-import pkg from "consola";
-const { success } = pkg;
+import consola from "consola";
+import Redis from "ioredis";
+
+const redis = new Redis();
 
 async function startApolloServer() {
   // Required logic for integrating with Express
@@ -20,6 +23,10 @@ async function startApolloServer() {
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    context: ({ req }) => {
+      const user = req.user || null;
+      return { user, redis, ...AppModels };
+    },
   });
 
   // More required logic for integrating with Express
@@ -38,7 +45,7 @@ async function startApolloServer() {
     httpServer.listen({ port: process.env.PORT || 4000 }, resolve)
   );
   if (process.env.NODE_ENV !== "production")
-    success({
+    consola.success({
       badge: true,
       message: `🚀 Server started on http://localhost:4000${server.graphqlPath}`,
     });
@@ -48,6 +55,6 @@ mongoose.connect(DB, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-success({ badge: true, message: `🚀 DB Connected Successfully` });
+consola.success({ badge: true, message: `🚀 DB Connected Successfully` });
 
 startApolloServer();
