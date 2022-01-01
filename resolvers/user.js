@@ -148,6 +148,8 @@ export default {
 
         // generate random 6 digits code
         const token = uuid();
+        usr.passwordToken = token;
+        await usr.save();
         // write token to the database user record
 
         // await redis.set(
@@ -170,15 +172,14 @@ export default {
     },
     changePassword: async (_, { token, newPassword }, { User }) => {
       try {
-        // const userId = await redis.get("forget-password:" + token);
-        // get the user id from the database using the provided token
-        const userId = "618776703dc2e3c7bc8386e1";
-        if (!userId) throw new ApolloError("token is incorrect or expired");
-
-        let user = await User.findById(userId);
-        if (!user) throw new ApolloError("user is no longer exist");
+        let user = await User.findOne({ passwordToken: token });
+        if (!user)
+          throw new ApolloError(
+            "token is incorrect or user is no longer exist"
+          );
 
         user.password = await hash(newPassword, 12);
+        user.passwordToken = null;
         let res = await user.save();
         res = res.toObject();
         res.id = res._id;

@@ -28,6 +28,7 @@ const UserSchema = new Schema(
       enum: ["buyer", "seller", "admin"],
       default: "buyer",
     },
+    passwordToken: String,
     permissions: { type: [String], default: ["read:own_user"] },
     sellerProducts: [{ type: Schema.Types.ObjectId, ref: "products" }],
     cartProducts: [{ type: Schema.Types.ObjectId, ref: "products" }],

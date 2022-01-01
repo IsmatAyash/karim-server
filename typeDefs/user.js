@@ -29,6 +29,7 @@ export default gql`
     password: String!
     avatar: String
     role: String
+    passwordToken: String
     permissions: [String!]
     sellerProducts: [Product!]
     cartProducts: [Product!]
