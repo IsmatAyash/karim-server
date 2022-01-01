@@ -1,12 +1,13 @@
-import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
-import express from "express";
+import { graphqlUploadExpress } from "graphql-upload";
+import { ApolloServer } from "apollo-server-express";
 import { createServer } from "http";
 import mongoose from "mongoose";
-import typeDefs from "./typeDefs/index.js";
-import resolvers from "./resolvers/index.js";
-import * as AppModels from "./models/index.js";
+import express from "express";
 
+import * as AppModels from "./models/index.js";
+import resolvers from "./resolvers/index.js";
+import typeDefs from "./typeDefs/index.js";
 import { DB } from "./config/index.js";
 import consola from "consola";
 
@@ -14,6 +15,7 @@ async function startApolloServer() {
   // Required logic for integrating with Express
   const app = express();
   const httpServer = createServer(app);
+  app.use(graphqlUploadExpress());
 
   // Same ApolloServer initialization as before, plus the drain plugin.
   const server = new ApolloServer({

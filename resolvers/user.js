@@ -150,17 +150,6 @@ export default {
         const token = uuid();
         usr.passwordToken = token;
         await usr.save();
-        // write token to the database user record
-
-        // await redis.set(
-        //   "forget-password:" + token,
-        //   usr.id,
-        //   "ex",
-        //   1000 * 3600 * 24 * 3 // 3 days to expire
-        // );
-        // save generated code in the database
-        // send an email
-
         await sendEmail(
           email,
           `<a href="http://localhost/3000/change-password/${token}">reset password</a>`
