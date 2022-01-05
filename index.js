@@ -1,59 +1,22 @@
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
-import { graphqlUploadExpress } from "graphql-upload";
-import { ApolloServer } from "apollo-server-express";
 import { createServer } from "http";
-import mongoose from "mongoose";
+import expressJwt from "express-jwt";
 import express from "express";
 
-import * as AppModels from "./models/index.js";
-import resolvers from "./resolvers/index.js";
-import typeDefs from "./typeDefs/index.js";
-import { DB } from "./config/index.js";
-import consola from "consola";
+import { SECRET } from "./config/index.js";
+import startdb from "./startup/startdb.js";
+import startApolloServer from "./startup/startApolloServer.js";
 
-async function startApolloServer() {
-  // Required logic for integrating with Express
-  const app = express();
-  const httpServer = createServer(app);
-  app.use(graphqlUploadExpress());
-
-  // Same ApolloServer initialization as before, plus the drain plugin.
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-    context: ({ req }) => {
-      const user = req.user || null;
-      return { user, ...AppModels };
-    },
-  });
-
-  // More required logic for integrating with Express
-  await server.start();
-  server.applyMiddleware({
-    app,
-
-    // By default, apollo-server hosts its GraphQL endpoint at the
-    // server root. However, *other* Apollo Server packages host it at
-    // /graphql. Optionally provide this to match apollo-server.
-    path: "/",
-  });
-
-  // Modified server startup
-  await new Promise((resolve) =>
-    httpServer.listen({ port: process.env.PORT || 4000 }, resolve)
-  );
-  if (process.env.NODE_ENV !== "production")
-    consola.success({
-      badge: true,
-      message: `🚀 Server started on http://localhost:4000${server.graphqlPath}`,
-    });
-}
-
-mongoose.connect(DB, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+const app = express();
+const httpServer = createServer(app);
+const jwt = expressJwt({
+  secret: SECRET,
+  algorithms: ["HS256"],
+  credentialsRequired: false,
 });
-consola.success({ badge: true, message: `🚀 DB Connected Successfully` });
+app.use(jwt);
+startdb();
+startApolloServer(app, httpServer);
 
-startApolloServer();
+await new Promise((resolve) =>
+  httpServer.listen({ port: process.env.PORT || 4000 }, resolve)
+);
