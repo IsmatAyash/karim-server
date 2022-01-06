@@ -1,5 +1,8 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import {
+  ApolloServerPluginDrainHttpServer,
+  ApolloServerPluginInlineTrace,
+} from "apollo-server-core";
 import { applyMiddleware } from "graphql-middleware";
 import { ApolloServer } from "apollo-server-express";
 import * as AppModels from "../models/index.js";
@@ -19,7 +22,10 @@ export default async function (app, httpServer) {
         const user = req.user || null;
         return { user, ...AppModels };
       },
-      plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+      plugins: [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+        ApolloServerPluginInlineTrace(),
+      ],
       introspection: process.env.NODE_ENV !== "production",
     });
 
