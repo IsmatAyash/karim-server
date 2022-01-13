@@ -27,15 +27,15 @@ const myCustomLabels = {
 export default {
   Upload: GraphQLUpload,
   Query: {
-    // products: async (parent, args, { Product }) => {
-    //   try {
-    //     const prod = await Product.find().populate("seller").exec()
-    //     if (!prod) throw new ApolloError("Unable to query products.")
-    //     return prod
-    //   } catch (err) {
-    //     throw new ApolloError(err.message, 400)
-    //   }
-    // },
+    allProducts: async (parent, args, { Product }) => {
+      try {
+        const prod = await Product.find().populate("seller").exec();
+        if (!prod) throw new ApolloError("Unable to query products.");
+        return prod;
+      } catch (err) {
+        throw new ApolloError(err.message, 400);
+      }
+    },
     getProduct: async (_, { id }, { Product }) => {
       return await Product.findById(id).populate("seller");
     },

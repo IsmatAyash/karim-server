@@ -1,8 +1,9 @@
-import { gql } from "apollo-server-express"
+import { gql } from "apollo-server-express";
 
 export default gql`
   scalar Upload
   extend type Query {
+    allProducts: [Product!]
     getProduct(id: ID!): Product!
     products(cat: String!, page: Int, limit: Int): ProductPaginator!
     tags: [Tags]
@@ -95,4 +96,4 @@ export default gql`
     message: String!
     success: Boolean
   }
-`
+`;
